@@ -1,0 +1,12 @@
+server :
+  applicationConnectors:
+    - type: http
+      port: 9012
+    
+  adminConnectors:
+    - type: http
+      port: 9013
+mongoConfiguration:
+  host: localhost
+
+
