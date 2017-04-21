@@ -41,5 +41,23 @@ public abstract class JsonResponses {
 		
 	}
 	
+	public static class JsonSuccessWithData extends JsonResponses{
+		
+		public Object data;
+		
+		public JsonSuccessWithData(Object data)
+		{
+			super("Done");
+			this.data = data;
+			this.status = Status.OK;
+		}
+		
+		@Override
+		public Response toResponse() {
+			return Response.ok(data).build();
+		}
+		
+	}
+	
 	
 }

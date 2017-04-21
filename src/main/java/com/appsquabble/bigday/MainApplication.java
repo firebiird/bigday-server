@@ -33,7 +33,7 @@ public class MainApplication extends Application<BigDayConfiguration> {
 		
 		
 		environment.jersey().register(new AccountsResource(services));
-		environment.jersey().register(new ManagementResource());
+		environment.jersey().register(new ManagementResource(services));
 		environment.jersey().register(new ClientResource());
 		
 		

@@ -11,6 +11,7 @@ import org.mongojack.WriteResult;
 import com.appsquabble.bigday.data.User;
 import com.appsquabble.bigday.data.Wedding;
 import com.appsquabble.bigday.helpers.Utils;
+import com.appsquabble.bigday.packages.EmailApprovalPackage;
 import com.appsquabble.bigday.packages.LoginPackage;
 import com.appsquabble.bigday.packages.RegistrationPackage;
 import com.appsquabble.bigday.packages.WeddingPackage;
@@ -109,6 +110,32 @@ public class AccountService {
 		return users.count(new BasicDBObject(User.FIELD_EMAIL,rp.getEmail())) != 0;
 		
 	}
+	
+	public Optional<Wedding> getWeddingForUser(String token)
+	{
+		Optional<User> user = getUserForToken(token);
+		
+		if(user.isPresent())
+		{
+			Wedding wedding = weddings.findOne(DBQuery.is(Wedding.FIELD_ID, user.get().getWedding()));
+			
+			return Optional.ofNullable(wedding);
+			
+		}
+		
+		return Optional.empty();
+		
+	}
+	
+	
+	private Optional<Wedding> getWeddingForUser(User user)
+	{
+		
+			Wedding wedding = weddings.findOne(DBQuery.is(Wedding.FIELD_ID, user.getWedding()));
+			
+			return Optional.ofNullable(wedding);
+		
+	}
 
 	public boolean isUserAuthenticated(String token) {
 		
@@ -169,6 +196,38 @@ public class AccountService {
 			return Optional.empty();
 		}
 		
+	}
+
+	public boolean approveUser(String token, EmailApprovalPackage eap) {
+	
+		Optional<User> user = getUserForToken(token);
+		
+		if(user.isPresent())
+		{
+			Optional<Wedding> wedding = getWeddingForUser(user.get());
+			
+			if(wedding.isPresent())
+			{
+				if(wedding.get().getEmails().contains(user.get().getEmail()))
+				{
+					// this person is authorised to move users into the approved bin.
+					
+					if(wedding.get().getUsersToBeAuthed().contains(eap.getEmail()))
+					{
+//						and the email to be authorised is in there.
+						
+						wedding.get().getUsersToBeAuthed().remove(eap.getEmail());
+						wedding.get().getEmails().add(eap.getEmail());
+						
+						weddings.save(wedding.get());
+						
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	
